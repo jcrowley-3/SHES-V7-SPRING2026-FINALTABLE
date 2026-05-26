@@ -1,46 +1,62 @@
 <h2 class="sr-only">Interactive tool showing all 27 possible final league table outcomes based on remaining match results for St. Bede, St. James, and Mother of Mercy. Goal difference excluded as scores are unknown.</h2>
 
 <style>
-.scenario-controls { display: flex; flex-wrap: wrap; gap: 12px; margin: 1rem 0 1.5rem; }
-.result-group { display: flex; flex-direction: column; gap: 6px; flex: 1; min-width: 160px; }
-.result-group label { font-size: 13px; color: var(--color-text-secondary); font-weight: 500; }
-.result-group select { width: 100%; }
+/* CHANGED: Switched from row (horizontal) to column (vertical) and restricted width so they don't stretch too wide */
+.scenario-controls { 
+  display: flex; 
+  flex-direction: column; 
+  gap: 16px; 
+  margin: 1rem 0 1.5rem; 
+  max-width: 300px; 
+}
+.result-group { display: flex; flex-direction: column; gap: 6px; }
+.result-group label { font-size: 14px; color: var(--color-text-secondary); font-weight: 500; }
 
-/* CHANGED: Added max-width to keep columns from stretching too wide on desktop, and centered it */
+/* CHANGED: Added padding to the dropdowns to make them easier to click/tap with the larger text */
+.result-group select { width: 100%; padding: 6px 8px; font-size: 15px; }
+
 .table-wrap { 
   border: 0.5px solid var(--color-border-tertiary); 
   border-radius: var(--border-radius-lg); 
   overflow: hidden; 
   max-width: 600px; 
-  margin: 0 auto; 
+  margin: 0 0 1rem 0; 
 }
 
-/* CHANGED: Increased font-size from 14px to 16px */
 table { width: 100%; border-collapse: collapse; font-size: 16px; table-layout: fixed; }
 thead tr { background: var(--color-background-secondary); }
 
-/* CHANGED: Increased padding and header font size (12px to 14px) */
 th { padding: 12px 14px; text-align: left; font-weight: 500; font-size: 14px; color: var(--color-text-secondary); border-bottom: 0.5px solid var(--color-border-tertiary); }
 th:not(:first-child) { text-align: center; }
 
-/* CHANGED: Increased padding for better breathing room with larger text */
 td { padding: 12px 14px; border-bottom: 0.5px solid var(--color-border-tertiary); color: var(--color-text-primary); }
 td:not(:first-child) { text-align: center; color: var(--color-text-secondary); }
 tr:last-child td { border-bottom: none; }
 .sacred-heart td { background: #E6F1FB22; }
 .sacred-heart td:first-child { font-weight: 500; }
 
-/* CHANGED: Slightly bumped up badge size to match the larger text */
 .pos-badge { display: inline-flex; align-items: center; justify-content: center; width: 24px; height: 24px; border-radius: 50%; font-size: 13px; font-weight: 500; margin-right: 8px; }
 .pos-1 { background: #FAC775; color: #412402; }
 .pos-2 { background: #D3D1C7; color: #2C2C2A; }
 .pos-3 { background: #F5C4B3; color: #4A1B0C; }
 .pos-4 { background: var(--color-background-secondary); color: var(--color-text-secondary); }
 
-/* CHANGED: Bumped up points font size from 15px to 18px */
 .pts-strong { font-weight: 600; color: var(--color-text-primary) !important; font-size: 18px; }
-.scenario-label { font-size: 13px; color: var(--color-text-secondary); margin-bottom: 1rem; padding: 8px 12px; background: var(--color-background-secondary); border-radius: var(--border-radius-md); }
-.tied-note { font-size: 12px; color: var(--color-text-warning); background: var(--color-background-warning); border-radius: var(--border-radius-md); padding: 6px 10px; margin-top: 10px; display: none; }
+
+/* CHANGED: Increased font size from 13px to 16px, added bolding, and matched the table's max-width */
+.scenario-label { 
+  font-size: 16px; 
+  font-weight: 600;
+  color: var(--color-text-primary); 
+  margin-bottom: 1.5rem; 
+  padding: 10px 14px; 
+  background: var(--color-background-secondary); 
+  border-radius: var(--border-radius-md); 
+  max-width: 600px;
+  box-sizing: border-box;
+}
+
+.tied-note { font-size: 13px; color: var(--color-text-warning); background: var(--color-background-warning); border-radius: var(--border-radius-md); padding: 8px 12px; margin-top: 10px; max-width: 600px; box-sizing: border-box; display: none; }
 </style>
 
 <div style="padding: 1rem 0;">
