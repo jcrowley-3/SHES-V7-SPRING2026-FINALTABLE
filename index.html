@@ -1,0 +1,147 @@
+
+<h2 class="sr-only">Interactive tool showing all 27 possible final league table outcomes based on remaining match results for St. Bede, St. James, and Mother of Mercy. Goal difference excluded as scores are unknown.</h2>
+
+<style>
+.scenario-controls { display: flex; flex-wrap: wrap; gap: 12px; margin: 1rem 0 1.5rem; }
+.result-group { display: flex; flex-direction: column; gap: 6px; flex: 1; min-width: 160px; }
+.result-group label { font-size: 13px; color: var(--color-text-secondary); font-weight: 500; }
+.result-group select { width: 100%; }
+.table-wrap { border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-lg); overflow: hidden; }
+table { width: 100%; border-collapse: collapse; font-size: 14px; table-layout: fixed; }
+thead tr { background: var(--color-background-secondary); }
+th { padding: 10px 12px; text-align: left; font-weight: 500; font-size: 12px; color: var(--color-text-secondary); border-bottom: 0.5px solid var(--color-border-tertiary); }
+th:not(:first-child) { text-align: center; }
+td { padding: 10px 12px; border-bottom: 0.5px solid var(--color-border-tertiary); color: var(--color-text-primary); }
+td:not(:first-child) { text-align: center; color: var(--color-text-secondary); }
+tr:last-child td { border-bottom: none; }
+.sacred-heart td { background: #E6F1FB22; }
+.sacred-heart td:first-child { font-weight: 500; }
+.pos-badge { display: inline-flex; align-items: center; justify-content: center; width: 22px; height: 22px; border-radius: 50%; font-size: 12px; font-weight: 500; margin-right: 8px; }
+.pos-1 { background: #FAC775; color: #412402; }
+.pos-2 { background: #D3D1C7; color: #2C2C2A; }
+.pos-3 { background: #F5C4B3; color: #4A1B0C; }
+.pos-4 { background: var(--color-background-secondary); color: var(--color-text-secondary); }
+.pts-strong { font-weight: 500; color: var(--color-text-primary) !important; font-size: 15px; }
+.scenario-label { font-size: 13px; color: var(--color-text-secondary); margin-bottom: 1rem; padding: 8px 12px; background: var(--color-background-secondary); border-radius: var(--border-radius-md); }
+.tied-note { font-size: 12px; color: var(--color-text-warning); background: var(--color-background-warning); border-radius: var(--border-radius-md); padding: 6px 10px; margin-top: 10px; display: none; }
+</style>
+
+<div style="padding: 1rem 0;">
+  <div class="scenario-controls">
+    <div class="result-group">
+      <label>St. Bede result</label>
+      <select id="sel-bede">
+        <option value="Win">Win</option>
+        <option value="Draw">Draw</option>
+        <option value="Loss" selected>Loss</option>
+      </select>
+    </div>
+    <div class="result-group">
+      <label>St. James result</label>
+      <select id="sel-james">
+        <option value="Win">Win</option>
+        <option value="Draw">Draw</option>
+        <option value="Loss" selected>Loss</option>
+      </select>
+    </div>
+    <div class="result-group">
+      <label>Mother of Mercy result</label>
+      <select id="sel-mom">
+        <option value="Win">Win</option>
+        <option value="Draw">Draw</option>
+        <option value="Loss" selected>Loss</option>
+      </select>
+    </div>
+  </div>
+
+  <div id="scenario-label" class="scenario-label"></div>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th style="width: 46%">Team</th>
+          <th style="width: 9%">GP</th>
+          <th style="width: 9%">W</th>
+          <th style="width: 9%">D</th>
+          <th style="width: 9%">L</th>
+          <th style="width: 18%">Pts</th>
+        </tr>
+      </thead>
+      <tbody id="table-body"></tbody>
+    </table>
+  </div>
+  <div id="tied-note" class="tied-note"></div>
+</div>
+
+<script>
+const base = {
+  "Sacred Heart":    {gp: 8, w: 4, d: 0, l: 4, pts: 12},
+  "St. Bede":        {gp: 7, w: 3, d: 2, l: 2, pts: 11},
+  "St. James":       {gp: 7, w: 3, d: 1, l: 3, pts: 10},
+  "Mother of Mercy": {gp: 7, w: 3, d: 0, l: 4, pts: 9},
+};
+const pending = ["St. Bede", "St. James", "Mother of Mercy"];
+const selIds = ["sel-bede", "sel-james", "sel-mom"];
+
+function compute() {
+  const results = selIds.map(id => document.getElementById(id).value);
+  const final = {};
+  for (const [team, data] of Object.entries(base)) {
+    final[team] = {...data};
+  }
+  const ptsMap = {Win: 3, Draw: 1, Loss: 0};
+  results.forEach((res, i) => {
+    const t = pending[i];
+    final[t].gp += 1;
+    final[t].pts += ptsMap[res];
+    if (res === "Win") final[t].w += 1;
+    else if (res === "Draw") final[t].d += 1;
+    else final[t].l += 1;
+  });
+
+  const ranked = Object.entries(final).sort((a, b) => b[1].pts - a[1].pts);
+
+  const shPos = ranked.findIndex(([t]) => t === "Sacred Heart") + 1;
+  const posLabels = ["1st","2nd","3rd","4th"];
+  const labelEl = document.getElementById("scenario-label");
+  labelEl.textContent = results.map((r, i) => `${pending[i]}: ${r}`).join("  ·  ") + `  —  Sacred Heart finish ${posLabels[shPos-1]}`;
+
+  const tbody = document.getElementById("table-body");
+  tbody.innerHTML = "";
+  const badges = ["pos-1","pos-2","pos-3","pos-4"];
+
+  ranked.forEach(([team, d], idx) => {
+    const isSH = team === "Sacred Heart";
+    const row = document.createElement("tr");
+    if (isSH) row.className = "sacred-heart";
+    row.innerHTML = `
+      <td><span class="pos-badge ${badges[idx]}">${idx+1}</span>${team}</td>
+      <td>${d.gp}</td>
+      <td>${d.w}</td>
+      <td>${d.d}</td>
+      <td>${d.l}</td>
+      <td class="pts-strong">${d.pts}</td>
+    `;
+    tbody.appendChild(row);
+  });
+
+  const ptsList = ranked.map(([,d]) => d.pts);
+  const tiedPairs = [];
+  for (let i = 0; i < ptsList.length - 1; i++) {
+    if (ptsList[i] === ptsList[i+1]) {
+      tiedPairs.push(`${ranked[i][0]} & ${ranked[i+1][0]} (${ptsList[i]} pts)`);
+    }
+  }
+  const noteEl = document.getElementById("tied-note");
+  if (tiedPairs.length) {
+    noteEl.style.display = "block";
+    noteEl.textContent = "Points tie: " + tiedPairs.join(", ") + " — final positions depend on goal difference.";
+  } else {
+    noteEl.style.display = "none";
+  }
+}
+
+selIds.forEach(id => document.getElementById(id).addEventListener("change", compute));
+compute();
+</script>
