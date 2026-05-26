@@ -1,7 +1,6 @@
 <h2 class="sr-only">Interactive tool showing all 27 possible final league table outcomes based on remaining match results for St. Bede, St. James, and Mother of Mercy. Goal difference excluded as scores are unknown.</h2>
 
 <style>
-/* CHANGED: Switched from row (horizontal) to column (vertical) and restricted width so they don't stretch too wide */
 .scenario-controls { 
   display: flex; 
   flex-direction: column; 
@@ -11,8 +10,6 @@
 }
 .result-group { display: flex; flex-direction: column; gap: 6px; }
 .result-group label { font-size: 14px; color: var(--color-text-secondary); font-weight: 500; }
-
-/* CHANGED: Added padding to the dropdowns to make them easier to click/tap with the larger text */
 .result-group select { width: 100%; padding: 6px 8px; font-size: 15px; }
 
 .table-wrap { 
@@ -32,18 +29,21 @@ th:not(:first-child) { text-align: center; }
 td { padding: 12px 14px; border-bottom: 0.5px solid var(--color-border-tertiary); color: var(--color-text-primary); }
 td:not(:first-child) { text-align: center; color: var(--color-text-secondary); }
 tr:last-child td { border-bottom: none; }
+
+/* NEW: Creates a solid, distinct line beneath the 3rd team (6th place) to separate it from the 4th team (7th place) */
+#table-body tr:nth-child(3) td {
+  border-bottom: 2px solid var(--color-border-primary, #888888);
+}
+
 .sacred-heart td { background: #E6F1FB22; }
 .sacred-heart td:first-child { font-weight: 500; }
 
 .pos-badge { display: inline-flex; align-items: center; justify-content: center; width: 24px; height: 24px; border-radius: 50%; font-size: 13px; font-weight: 500; margin-right: 8px; }
-.pos-1 { background: #FAC775; color: #412402; }
-.pos-2 { background: #D3D1C7; color: #2C2C2A; }
-.pos-3 { background: #F5C4B3; color: #4A1B0C; }
-.pos-4 { background: var(--color-background-secondary); color: var(--color-text-secondary); }
+
+.pos-4, .pos-5, .pos-6, .pos-7 { background: var(--color-background-secondary); color: var(--color-text-secondary); }
 
 .pts-strong { font-weight: 600; color: var(--color-text-primary) !important; font-size: 18px; }
 
-/* CHANGED: Increased font size from 13px to 16px, added bolding, and matched the table's max-width */
 .scenario-label { 
   font-size: 16px; 
   font-weight: 600;
@@ -135,19 +135,21 @@ function compute() {
 
   const ranked = Object.entries(final).sort((a, b) => b[1].pts - a[1].pts);
 
-  const shPos = ranked.findIndex(([t]) => t === "Sacred Heart") + 1;
-  const posLabels = ["1st","2nd","3rd","4th"];
+  const shPos = ranked.findIndex(([t]) => t === "Sacred Heart") + 4;
+  const posLabels = ["4th","5th","6th","7th"];
   const labelEl = document.getElementById("scenario-label");
-  labelEl.textContent = results.map((r, i) => `${pending[i]}: ${r}`).join("  ·  ") + `  —  Sacred Heart finish ${posLabels[shPos-1]}`;
+  labelEl.textContent = results.map((r, i) => `${pending[i]}: ${r}`).join("  ·  ") + `  —  Sacred Heart finish ${posLabels[shPos-4]}`;
 
   const tbody = document.getElementById("table-body");
   tbody.innerHTML = "";
-  const badges = ["pos-1","pos-2","pos-3","pos-4"];
+  
+  const badges = ["pos-4","pos-5","pos-6","pos-7"];
 
   ranked.forEach(([team, d], idx) => {
     const isSH = team === "Sacred Heart";
     const row = document.createElement("tr");
     if (isSH) row.className = "sacred-heart";
+    
     row.innerHTML = `
       <td><span class="pos-badge ${badges[idx]}">${idx+4}</span>${team}</td>
       <td>${d.gp}</td>
